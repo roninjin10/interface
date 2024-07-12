@@ -24,6 +24,7 @@
     "react-native-svg": "15.1.0",
     "react-native-webview": "11.23.1",
     "tamagui": "1.95.1",
+    "tevm": "1.1.0-next.98",
     "utilities": "workspace:^",
     "wcag-contrast": "3.0.0"
   },
