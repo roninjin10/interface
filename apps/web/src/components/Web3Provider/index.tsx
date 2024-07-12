@@ -1,7 +1,7 @@
 import { QueryClientProvider } from '@tanstack/react-query'
 import { CustomUserProperties, InterfaceEventName, WalletConnectionResult } from '@uniswap/analytics-events'
 import { recentConnectorIdAtom } from 'components/Web3Provider/constants'
-import { queryClient, wagmiConfig } from 'components/Web3Provider/wagmi'
+import { queryClient, wagmiConfig, wagmiConfigTevm } from 'components/Web3Provider/wagmi'
 import { useIsSupportedChainId } from 'constants/chains'
 import { RPC_PROVIDERS } from 'constants/providers'
 import { useAccount } from 'hooks/useAccount'
@@ -9,7 +9,7 @@ import { ConnectionProvider } from 'hooks/useConnect'
 import { useEthersWeb3Provider } from 'hooks/useEthersProvider'
 import usePrevious from 'hooks/usePrevious'
 import { useUpdateAtom } from 'jotai/utils'
-import { ReactNode, useEffect } from 'react'
+import { ReactNode, useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import { useConnectedWallets } from 'state/wallets/hooks'
 import { FeatureFlags } from 'uniswap/src/features/gating/flags'
@@ -23,11 +23,36 @@ import { getWalletMeta } from 'utils/walletMeta'
 import { WagmiProvider } from 'wagmi'
 
 export default function Web3Provider({ children }: { children: ReactNode }) {
+  const [config, setConfig] = useState<typeof wagmiConfig | typeof wagmiConfigTevm>(wagmiConfig)
+
+  const currentConfig = (() => {
+    if (config === wagmiConfig) {
+      return 'Mainnet'
+    } else if (config === wagmiConfigTevm) {
+      return 'Playground'
+    }
+    return ''
+  })()
+
+  const toggleConfig = () => {
+    if (config === wagmiConfig) {
+      setConfig(wagmiConfigTevm)
+    } else {
+      setConfig(wagmiConfig)
+    }
+  }
+
   return (
-    <WagmiProvider config={wagmiConfig}>
+    <WagmiProvider config={config}>
       <QueryClientProvider client={queryClient}>
         <ConnectionProvider>
           <Updater />
+          <div>
+            <div>{currentConfig}</div>
+            <button onClick={toggleConfig}>{`Switch to ${
+              currentConfig === 'Mainnet' ? 'Playground' : 'Mainnet'
+            }`}</button>
+          </div>
           {children}
         </ConnectionProvider>
       </QueryClientProvider>
